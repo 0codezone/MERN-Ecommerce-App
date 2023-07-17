@@ -3,10 +3,12 @@ import Layout from "./../../components/Layout/Layout";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../../styles/AuthStyles.css";
+import { useAuth } from "../../context/Auth";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [auth, setAuth] = useAuth();
 
   const navigate = useNavigate();
 
@@ -23,6 +25,14 @@ const Login = () => {
       );
       if (res && res.data.success) {
         alert(res.data && res.data.message);
+        setAuth({
+          ...auth, //spread operator
+          user: res.data.user,
+          token: res.data.token,
+        });
+
+        // --------------- localStorage ----------------
+        localStorage.setItem("auth", JSON.stringify(res.data));
         navigate("/");
       } else {
         alert(res.data.message);
