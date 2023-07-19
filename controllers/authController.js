@@ -8,7 +8,7 @@ colors.enable();
 // ---------------------------------------------REGISTRATION--------------------------------------------------
 export const registerController = async (req, res) => {
   try {
-    const { name, email, password, phone, address } = req.body;
+    const { name, email, password, phone, address, answer } = req.body;
     //validation
     if (!name) {
       return res.send({ message: "Name is required" });
@@ -24,6 +24,9 @@ export const registerController = async (req, res) => {
     }
     if (!address) {
       return res.send({ message: "Address is required" });
+    }
+    if (!answer) {
+      return res.send({ message: "Answer is required" });
     }
 
     //check user--------
@@ -47,6 +50,7 @@ export const registerController = async (req, res) => {
       password: hashedPassword,
       phone,
       address,
+      answer,
     });
     //save user to db
     await newUser.save();
@@ -110,6 +114,7 @@ export const loginController = async (req, res) => {
         email: user.email,
         phone: user.phone,
         address: user.address,
+        // answer: user.answer,
       },
       token,
     });
@@ -123,6 +128,57 @@ export const loginController = async (req, res) => {
   }
 };
 
+// / -----------------------------------------------forget password-----------------------------------------
+export const forgetPasswordController = async (req, res) => {
+  try {
+    const { email, answer, newPassword } = req.body;
+    //validation
+    if (!email) {
+      res.status(404).json({
+        success: false,
+        message: "Email is required",
+      });
+    }
+    //validation
+    if (!answer) {
+      res.status(404).json({
+        success: false,
+        message: "Answer is required",
+      });
+    }
+    //validation
+    if (!newPassword) {
+      res.status(404).json({
+        success: false,
+        message: "newPassword is required",
+      });
+    }
+
+    //check user--------
+    const user = await userModel.findOne({ email, answer });
+    //validating user
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: "wrong email or answer",
+      });
+    }
+    //hash password
+    const hashed = await hashPassword(newPassword);
+    await userModel.findOneAndUpdate(user._id, { password: hashed });
+    res.status(200).json({
+      success: true,
+      message: "Password updated successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Server Login Error Something went Wrong",
+      error,
+    });
+  }
+};
 // -----------------------------------------------test Contoller for testing routes-----------------------------------------
 export const testController = (req, res) => {
   try {
