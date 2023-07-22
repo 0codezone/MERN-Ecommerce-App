@@ -23,8 +23,13 @@ router.post("/forget-password", forgetPasswordController);
 //test routes
 router.get("/test", requireSignin, isAdmin, testController);
 
-//protected routes
+//protected user routes
 router.get("/user-auth", requireSignin, (req, res) => {
+  res.status(200).json({ ok: true });
+});
+
+//protected routes for admin
+router.get("/admin-auth", requireSignin, isAdmin, (req, res) => {
   res.status(200).json({ ok: true });
 });
 
